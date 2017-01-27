@@ -1,0 +1,8 @@
+.DS_Store
+_aot/
+_build/
+_generated/
+node_modules/
+*.sublime-workspace
+*.sublime-project
+npm-debug.log
