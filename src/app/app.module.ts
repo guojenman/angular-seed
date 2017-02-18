@@ -9,7 +9,7 @@ import { MdProgressCircleModule } from '@angular/material/progress-spinner';
 
 
 import { AppComponent } from './app.component';
-import { HttpModule, ConnectionBackend, XHRBackend, Http } from '@angular/http';
+import { HttpModule } from '@angular/http';
 
 const COMPONENTS = [
   AppComponent,

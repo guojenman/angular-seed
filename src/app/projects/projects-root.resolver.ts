@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 export class ProjectsRootResolver implements Resolve<any> {
   constructor() { }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
+  resolve(_0: ActivatedRouteSnapshot, _1: RouterStateSnapshot): Observable<any> {
     return Observable.of(true);
   }
 }

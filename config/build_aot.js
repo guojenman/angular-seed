@@ -38,7 +38,7 @@ return Promise.resolve()
       .pipe(gulp.dest('_aot/app'))
       .on('end', function () {
         execSync('npm run lint', { stdio: 'inherit' });
-        fs.copySync('src/app/tsconfig.json', '_aot/app/tsconfig.json');
+        fs.copySync('src/app/tsconfig-aot.json', '_aot/app/tsconfig.json');
         execSync('./node_modules/.bin/ngc -p _aot/app/', { stdio: 'inherit' });
         execSync('./node_modules/.bin/webpack --env.ENV=prod --config config/webpack.config.js  --hide-modules', { stdio: 'inherit' });
       });

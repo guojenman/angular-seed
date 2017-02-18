@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router, NavigationStart, NavigationEnd } from '@angular/router';
+import { Router } from '@angular/router';
 import './rxjs.imports';
 
 @Component({
@@ -16,10 +16,5 @@ import './rxjs.imports';
 export class AppComponent {
 
   constructor(public router: Router) {
-    let busyHandler: Function;
-    router.events.subscribe(event => {
-
-    });
-    // router.initialNavigation();
   }
 }
