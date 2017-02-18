@@ -31,9 +31,9 @@ module.exports = config => {
       },
       module: {
         rules: [
-          { test: /\.ts$/, loaders: ['ts-loader', 'angular-router-loader', 'angular2-template-loader', 'preprocess-loader?ENV=dev'], exclude: [/\.(spec|e2e)\.ts$/] },
+          { test: /\.ts$/, loaders: ['awesome-typescript-loader?configFileName=src/app/tsconfig.json', 'angular2-template-loader', 'preprocess-loader?ENV=dev', 'angular-router-loader'] },
           { test: /\.html$/, loaders: ['to-string-loader', 'preprocess-loader?ENV=dev'] },
-          { test: /\.css$/, loaders: ['to-string-loader', 'css-loader', 'postcss-loader?config=config/postcss.config.js'] },
+          { test: /\.(css|scss)$/, loaders: ['to-string-loader', 'css-loader?importLoaders=1', 'postcss-loader?config=config/postcss.config.js'] },
         ]
       },
       stats: { colors: true, reasons: true },

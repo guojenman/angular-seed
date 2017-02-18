@@ -1,24 +1,27 @@
 var webpack = require('webpack');
 var CompressionPlugin = require("compression-webpack-plugin");
 var CopyWebpackPlugin = require('copy-webpack-plugin');
+var preprocess = require('preprocess').preprocess;
+var sass = require('node-sass');
 var fs = require('fs-extra');
 var path = require('path');
 var utils = require('./utils');
-var preprocess = require('preprocess').preprocess;
 
 function buildLibs(env) {
-    var min = env === 'dev' ? '.min' : '';
     utils.concat([
-        'node_modules/jquery/dist/jquery' + min + '.js',
-        'node_modules/jquery.cookie/jquery.cookie.js',
-        'node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker' + min + '.js',
-
-        'node_modules/core-js/client/shim' + min + '.js',
-        'node_modules/zone.js/dist/zone' + min + '.js',
         'node_modules/reflect-metadata/Reflect.js',
-        'node_modules/intl/dist/Intl.js',
-        'node_modules/intl/locale-data/jsonp/en.js'
+
+        'node_modules/jquery/dist/jquery.min.js',
+        'node_modules/jquery.cookie/jquery.cookie.js',
+        'node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js',
     ], 'build/libs.js');
+
+    
+    // material.css
+    fs.writeFileSync('build/material.css', sass.renderSync({
+        file: 'src/css/_material.scss',
+        outputStyle: 'compressed',
+    }).css);
 }
 
 
@@ -55,25 +58,26 @@ module.exports = function (env) {
         module: {
             rules: [
                 { enforce: 'pre', test: /\.tsx?$/, loader: 'tslint-loader', exclude: [/(node_modules)/] },
-                { test: /\.ts$/, loaders: ['ts-loader', 'angular-router-loader' + (isAOT ? '?aot=true&genDir=./' : ''), 'angular2-template-loader', 'preprocess-loader?ENV=' + env.ENV], exclude: [/\.(spec|e2e)\.ts$/] },
-                { test: /\.html$/, loaders: ['to-string-loader', 'preprocess-loader?ENV=' + env.ENV] },
-                { test: /\.(css|scss)$/, loaders: ['to-string-loader', 'css-loader', 'postcss-loader?config=config/postcss.config.js'] },
+                { test: /\.ts$/, loaders: ['awesome-typescript-loader?configFileName=' + (isAOT ? '_aot' : 'src') + '/app/tsconfig.json', 'angular2-template-loader', 'preprocess-loader?ENV=' + env.ENV, 'angular-router-loader' + (isAOT ? '?aot=true&genDir=./' : '')], exclude: [/\.(spec|e2e)\.ts$/] },
+                { test: /\.html$/, loaders: ['raw-loader', 'preprocess-loader?ENV=' + env.ENV] },
+                { test: /\.(css|scss)$/, loaders: ['to-string-loader', 'css-loader?importLoaders=1', 'postcss-loader?config=config/postcss.config.js'] },
             ],
             exprContextCritical: false
         },
         plugins: [
-            new CopyWebpackPlugin([
-                { from: './src/assets/index.html', transform: preprocessCopy }
-            ]),
             new webpack.DefinePlugin({
                 IS_PRODUCTION: JSON.stringify(isAOT)
             }),
+            new CopyWebpackPlugin([
+                { from: './src/index.html', transform: preprocessCopy },
+                { context: './src/assets/', from: '**/*.*' }
+            ]),
             new webpack.LoaderOptionsPlugin({
                 minimize: true,
                 debug: false
             })
         ],
-        devtool: isAOT ? 'source-map' : 'cheap-source-map',
+        devtool: 'source-map',
         performance: {
             hints: false
         },
