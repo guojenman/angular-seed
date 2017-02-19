@@ -75,7 +75,7 @@
     "build:dev": "npm i && ./node_modules/.bin/webpack --env.ENV=dev --config config/webpack.config.js --hide-modules",
     "watch": "npm i && ./node_modules/.bin/webpack --env.ENV=dev --watch --config config/webpack.config.js --hide-modules",
     "unit-test": "./node_modules/.bin/karma start config/karma.conf.js",
-    "lint": "./node_modules/.bin/tslint -c tslint.json --p src/js/tsconfig.json 'src/js/**/*.ts'",
+    "lint": "./node_modules/.bin/tslint -c tslint.json --p src/app/tsconfig.json 'src/**/*.ts'",
     "serve": "./node_modules/.bin/http-server ./build/",
     "rsync": "node ./config/rsync.js"
   },
