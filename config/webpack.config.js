@@ -1,6 +1,7 @@
 var webpack = require('webpack');
 var CompressionPlugin = require("compression-webpack-plugin");
 var CopyWebpackPlugin = require('copy-webpack-plugin');
+var ProgressBarPlugin = require('progress-bar-webpack-plugin');
 var preprocess = require('preprocess').preprocess;
 var sass = require('node-sass');
 var fs = require('fs-extra');
@@ -9,14 +10,12 @@ var utils = require('./utils');
 
 function buildLibs(env) {
     utils.concat([
-        'node_modules/reflect-metadata/Reflect.js',
-
         'node_modules/jquery/dist/jquery.min.js',
         'node_modules/jquery.cookie/jquery.cookie.js',
         'node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js',
     ], 'build/libs.js');
 
-    
+
     // material.css
     fs.writeFileSync('build/material.css', sass.renderSync({
         file: 'src/css/_material.scss',
@@ -57,7 +56,7 @@ module.exports = function (env) {
         },
         module: {
             rules: [
-                { enforce: 'pre', test: /\.tsx?$/, loader: 'tslint-loader', exclude: [/(node_modules)/] },
+                { enforce: 'pre', test: /\.tsx?$/, loader: 'tslint-loader', options: { typeCheck: false, tsConfigFile: (isAOT ? '_aot' : 'src') + '/app/tsconfig.json' }, exclude: [/(node_modules)/, /_aot/] },
                 { test: /\.ts$/, loaders: ['awesome-typescript-loader?configFileName=' + (isAOT ? '_aot' : 'src') + '/app/tsconfig.json', 'angular2-template-loader', 'preprocess-loader?ENV=' + env.ENV, 'angular-router-loader' + (isAOT ? '?aot=true&genDir=./' : '')], exclude: [/\.(spec|e2e)\.ts$/] },
                 { test: /\.html$/, loaders: ['raw-loader', 'preprocess-loader?ENV=' + env.ENV] },
                 { test: /\.(css|scss)$/, loaders: ['to-string-loader', 'css-loader?importLoaders=1', 'postcss-loader?config=config/postcss.config.js'] },
@@ -65,17 +64,15 @@ module.exports = function (env) {
             exprContextCritical: false
         },
         plugins: [
+            new ProgressBarPlugin(),
             new webpack.DefinePlugin({
-                IS_PRODUCTION: JSON.stringify(isAOT)
+                IS_PRODUCTION: JSON.stringify(isAOT),
+                IS_TEST_MUTATION_LOCALLY: JSON.stringify(env.TEST_MUTATION_LOCALLY === 'true')
             }),
             new CopyWebpackPlugin([
                 { from: './src/index.html', transform: preprocessCopy },
-                { context: './src/assets/', from: '**/*.*' }
+                { context: './src/assets/', from: '**/*.*' },
             ]),
-            new webpack.LoaderOptionsPlugin({
-                minimize: true,
-                debug: false
-            })
         ],
         devtool: 'source-map',
         performance: {
@@ -90,7 +87,7 @@ module.exports = function (env) {
             historyApiFallback: true,
             watchOptions: {
                 aggregateTimeout: 300,
-                poll: 1000
+                poll: 3000
             },
         },
         stats: {
@@ -98,6 +95,8 @@ module.exports = function (env) {
         }
     };
     if (isAOT) {
+        // --------------------------------
+        // --- compression
         config.plugins.push(
             new webpack.optimize.UglifyJsPlugin({
                 compress: { screw_ie8: true },
